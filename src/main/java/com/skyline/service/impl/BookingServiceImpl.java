@@ -123,8 +123,48 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse updateBookingById(int bookingId, BookingRequest request) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
-        modelMapper.map(request, Booking.class);
+        Users users = usersRepository.findById(request.getCustomerId())
+                .orElseThrow(() -> new NotFoundException("Customer not found with id: " + request.getCustomerId()));
+        Hotel hotel = hotelRepository.findById(request.getHotelId())
+                .orElseThrow(() -> new NotFoundException("Hotel not found with id: " + request.getHotelId()));
+
+        List<Booking> bookedRooms= bookingRepository
+                .findByHotel_IdAndCheckInDateAndStatus(
+                        request.getHotelId(),
+                        request.getCheckIn(),
+                        BookingStatus.BOOKED
+                );
+
+        int alreadyBookedRooms = bookedRooms.stream().filter(b-> b.getId() != bookingId)
+                .mapToInt(Booking::getNumberOfRooms)
+                .sum();
+        log.info("Already booked rooms (excluding current booking): {}", alreadyBookedRooms);
+
+        int availableRooms = hotel.getTotalRooms() - alreadyBookedRooms;
+        log.info("Available rooms: {}", availableRooms);
+
+        if (request.getNumberOfRooms() > availableRooms) {
+            throw new RequestRoomException(
+                    "Only " + availableRooms + " rooms available on " + request.getCheckIn()
+            );
+        }
+
+        booking.setCheckInDate(request.getCheckIn());
+        booking.setCheckOut(request.getCheckOut());
+        booking.setNumberOfRooms(request.getNumberOfRooms());
+        booking.setUsers(users);
+        booking.setHotel(hotel);
+        booking.setStatus(BookingStatus.BOOKED);
+
+
         Booking update = bookingRepository.save(booking);
-        return modelMapper.map(update, BookingResponse.class);
+
+       BookingResponse response =  modelMapper.map(update, BookingResponse.class);
+        response.setBookingId(booking.getId());
+        response.setHotelName(booking.getHotel().getName());
+        response.setCustomerName(booking.getUsers().getName());
+        response.setStatus(booking.getStatus().name());
+
+        return  response;
     }
 }
