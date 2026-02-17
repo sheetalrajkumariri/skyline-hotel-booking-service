@@ -21,7 +21,7 @@ public class SignUpController {
 
     @PostMapping("/sign-up")
     public UsersResponse createUser(@RequestBody UsersRequest request){
-        log.info("Start:: createUser()inside the UserController with request, {} ", request);
+        log.info("Start:: createUser()inside the AuthController with request, {} ", request);
         return usersService.createUser(request);
     }
 }

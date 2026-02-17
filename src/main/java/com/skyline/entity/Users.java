@@ -18,10 +18,11 @@ import java.util.Set;
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String name;
+    private int id;
     private String email;
     private String phone;
+    private String username;
+    private String password;
 
     //  USER ↔ ROLE (Many to Many)
     @ManyToMany(fetch = FetchType.EAGER)
@@ -37,6 +38,7 @@ public class Users {
     @JsonIgnore  //Customer <-> Booking / **One Customer can have many Bookings**
     @OneToMany(mappedBy = "users")
     private List<Booking> bookings;
+
 
 
 }

@@ -1,5 +1,6 @@
 package com.skyline.service.impl;
 
+import com.skyline.dto.UsersResponse;
 import com.skyline.exception.RequestRoomException;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -20,6 +21,7 @@ import com.skyline.repository.BookingRepository;
 import com.skyline.repository.UsersRepository;
 import com.skyline.repository.HotelRepository;
 import com.skyline.service.BookingService;
+
 import java.util.List;
 
 
@@ -35,6 +37,7 @@ public class BookingServiceImpl implements BookingService {
     @Autowired
     private HotelRepository hotelRepository;
 
+
     @Override
     public BookingResponse createBooking(BookingRequest request) {
         log.info("Start::createBooking()inside the BookingServiceImpl with the request, {} ", request);
@@ -43,7 +46,7 @@ public class BookingServiceImpl implements BookingService {
         Hotel hotel = hotelRepository.findById(request.getHotelId())
                 .orElseThrow(() -> new NotFoundException("Hotel not found with id: " + request.getHotelId()));
 
-        List<Booking> bookedRooms= bookingRepository
+        List<Booking> bookedRooms = bookingRepository
                 .findByHotel_IdAndCheckInDateAndStatus(
                         request.getHotelId(),
                         request.getCheckIn(),
@@ -70,10 +73,10 @@ public class BookingServiceImpl implements BookingService {
 
         booking = bookingRepository.save(booking);
 
-        BookingResponse response =  modelMapper.map(booking, BookingResponse.class);
+        BookingResponse response = modelMapper.map(booking, BookingResponse.class);
         response.setBookingId(booking.getId());
         response.setHotelName(booking.getHotel().getName());
-        response.setCustomerName(booking.getUsers().getName());
+        response.setCustomerName(booking.getUsers().getUsername());
         response.setStatus(booking.getStatus().name());
         log.info("Start::createBooking()inside the BookingServiceImpl with the request, {} ", request);
         return response;
@@ -84,8 +87,21 @@ public class BookingServiceImpl implements BookingService {
         log.info("Start:: findBookingById()inside the BookingServiceImpl with id, {} ", bookingId);
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
-        log.info("End:: findBookingById()inside the BookingServiceImpl with id, {} ", bookingId);
-        return modelMapper.map(booking, BookingResponse.class);
+        BookingResponse response = modelMapper.map(booking, BookingResponse.class);
+        if (booking.getUsers() != null) {
+            response.setCustomerName(booking.getUsers().getUsername());
+        }
+
+        if (booking.getHotel() != null) {
+            response.setHotelName(booking.getHotel().getName());
+        }
+        response.setBookingId(booking.getId());
+
+        response.setStatus(booking.getStatus().name());
+
+        log.info("End:: findBookingById() inside BookingServiceImpl with id: {}", bookingId);
+
+        return response;
     }
 
     @Override
@@ -100,14 +116,29 @@ public class BookingServiceImpl implements BookingService {
 
         Page<Booking> bookingPage = bookingRepository.findAll(pageable);
 
-        List<BookingResponse> responseList = bookingPage.getContent()
+        return bookingPage.getContent()
                 .stream()
-                .map(booking -> modelMapper.map(booking, BookingResponse.class))
+                .map(booking -> {
+
+                    BookingResponse response = new BookingResponse();
+
+                    response.setBookingId(booking.getId());
+                    response.setCheckIn(booking.getCheckInDate());
+                    response.setCheckOut(booking.getCheckOut());
+                    response.setNumberOfRooms(booking.getNumberOfRooms());
+                    response.setStatus(booking.getStatus().name());
+
+                    Users user = booking.getUsers();
+                    if (user != null) {
+                        response.setCustomerName(user.getUsername());
+                    }
+                    if (booking.getHotel() != null) {
+                        response.setHotelName(booking.getHotel().getName());
+                    }
+
+                    return response;
+                })
                 .toList();
-
-        log.info("End:: findAllBooking() inside BookingServiceImpl");
-
-        return responseList;
     }
 
     @Override
@@ -128,14 +159,14 @@ public class BookingServiceImpl implements BookingService {
         Hotel hotel = hotelRepository.findById(request.getHotelId())
                 .orElseThrow(() -> new NotFoundException("Hotel not found with id: " + request.getHotelId()));
 
-        List<Booking> bookedRooms= bookingRepository
+        List<Booking> bookedRooms = bookingRepository
                 .findByHotel_IdAndCheckInDateAndStatus(
                         request.getHotelId(),
                         request.getCheckIn(),
                         BookingStatus.BOOKED
                 );
 
-        int alreadyBookedRooms = bookedRooms.stream().filter(b-> b.getId() != bookingId)
+        int alreadyBookedRooms = bookedRooms.stream().filter(b -> b.getId() != bookingId)
                 .mapToInt(Booking::getNumberOfRooms)
                 .sum();
         log.info("Already booked rooms (excluding current booking): {}", alreadyBookedRooms);
@@ -159,12 +190,12 @@ public class BookingServiceImpl implements BookingService {
 
         Booking update = bookingRepository.save(booking);
 
-       BookingResponse response =  modelMapper.map(update, BookingResponse.class);
+        BookingResponse response = modelMapper.map(update, BookingResponse.class);
         response.setBookingId(booking.getId());
         response.setHotelName(booking.getHotel().getName());
-        response.setCustomerName(booking.getUsers().getName());
+        response.setCustomerName(booking.getUsers().getUsername());
         response.setStatus(booking.getStatus().name());
 
-        return  response;
+        return response;
     }
 }
