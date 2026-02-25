@@ -1,11 +1,12 @@
 package com.skyline.entity;
 
-import aj.org.objectweb.asm.ConstantDynamic;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import com.skyline.enums.BookingStatus;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDate;
 
@@ -14,6 +15,8 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@SQLDelete(sql = "UPDATE users SET deleted = true WHERE id=?")
+@SQLRestriction("deleted = false")
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +34,8 @@ public class Booking {
     @ManyToOne //Booking ↔ Customer
     @JoinColumn(name = "users_id")
     private Users users;
+
+    private boolean deleted = false;
 
 
 }

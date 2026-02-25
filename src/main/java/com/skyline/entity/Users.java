@@ -34,11 +34,9 @@ public class Users {
     private Set<Role> roles;
 
 
-
     @JsonIgnore  //Customer <-> Booking / **One Customer can have many Bookings**
     @OneToMany(mappedBy = "users")
     private List<Booking> bookings;
-
 
 
 }

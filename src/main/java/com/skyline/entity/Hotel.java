@@ -31,5 +31,4 @@ public class Hotel {
     private List<Booking> bookings = new ArrayList<>();
 
 
-
 }

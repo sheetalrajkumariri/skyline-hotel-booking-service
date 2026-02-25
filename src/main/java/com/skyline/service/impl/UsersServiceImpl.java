@@ -1,5 +1,6 @@
 package com.skyline.service.impl;
 
+import com.skyline.dto.HotelResponse;
 import com.skyline.entity.Role;
 import com.skyline.exception.EmailAlreadyExistsException;
 import com.skyline.repository.RoleRepository;
@@ -49,7 +50,7 @@ public class UsersServiceImpl implements UsersService {
         String encodedPassword = passwordEncoder.encode(request.getPassword());
         user.setPassword(encodedPassword);
 
-        Role role = roleRepository.findRoleByName("USER").orElseThrow(() -> new NotFoundException("Role not found with name: " + "User"));
+        Role role = roleRepository.findRoleByName(request.getRole()).orElseThrow(() -> new NotFoundException("Role not found with name: " + "User"));
         user.setRoles(Set.of(role));
         user = usersRepository.save(user);
         UsersResponse usersResponse = modelMapper.map(user, UsersResponse.class);
@@ -82,18 +83,25 @@ public class UsersServiceImpl implements UsersService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Users> customerPage = usersRepository.findAll(pageable);
+        Page<Users> pages = usersRepository.findAll(pageable);
 
-        List<UsersResponse> responseList = customerPage.getContent().stream().map(user -> {
-            UsersResponse response = modelMapper.map(user, UsersResponse.class);
+        List<UsersResponse> responseList = pages.getContent()
+                .stream()
+                .map(user -> {
+                    UsersResponse response = modelMapper.map(user, UsersResponse.class);
 
-            // Manual role mapping
-            if (user.getRoles() != null && !user.getRoles().isEmpty()) {
-                response.setRole(user.getRoles().stream().findFirst().get().getName());
-            }
+                    // manually map roles
+                    String roleName = user.getRoles()
+                            .stream()
+                            .map(Role::getName)
+                            .findFirst()
+                            .orElse(null);
 
-            return response;
-        }).toList();
+                    response.setRole(roleName);
+
+                    return response;
+                })
+                .toList();
 
         log.info("End:: findAllUser() inside UserServiceImpl");
 

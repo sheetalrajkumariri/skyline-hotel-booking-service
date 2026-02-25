@@ -48,14 +48,13 @@ public class SecurityConfig {
 
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/public/**").permitAll()
-                        .requestMatchers("/api/users/sign-up").permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/api/bookings/**").permitAll()
-
+//                        .requestMatchers("/auth/**", "/api/users/sign-up", "/api/hotels/**").permitAll()
+//                        .requestMatchers("/api/hotels/create", "/api/users/list").hasAuthority("ADMIN")
+//                        .requestMatchers("/users/**", "/api/bookings/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/**").permitAll()
 
                         .anyRequest().authenticated()
+
                 ).exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
                             Throwable cause = authException.getCause();

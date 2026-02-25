@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "6dabdad7-b8fb-4e43-bbc2-c088239bde8b",
+    "_postman_id": "cf2ebe24-48ec-48b7-b357-d54abc802b64",
     "name": "SkyLine-Service",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "46375487"
@@ -13,6 +13,91 @@
           "name": "bookingController",
           "item": [
             {
+              "name": "/get",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer YOUR_TOKEN",
+                    "type": "text",
+                    "disabled": true
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8085/api/bookings/get/8?",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8085",
+                  "path": [
+                    "api",
+                    "bookings",
+                    "get",
+                    "8"
+                  ],
+                  "query": [
+                    {
+                      "key": null,
+                      "value": null,
+                      "description": "This API is used to retrieve a specific booking by its ID.",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/list",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8085/api/bookings/list?page=0&size=10&sortBy=checkInDate&sortDir=desc",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8085",
+                  "path": [
+                    "api",
+                    "bookings",
+                    "list"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "checkInDate"
+                    },
+                    {
+                      "key": "sortDir",
+                      "value": "desc"
+                    }
+                  ]
+                },
+                "description": "This API returns all bookings from the database."
+              },
+              "response": []
+            },
+            {
               "name": "/create",
               "request": {
                 "auth": {
@@ -23,6 +108,12 @@
                   {
                     "key": "Content-Type",
                     "value": "application/json"
+                  },
+                  {
+                    "key": "",
+                    "value": "",
+                    "description": "This API is used to create a new booking in the Skyline system.",
+                    "type": "text"
                   }
                 ],
                 "body": {
@@ -46,34 +137,26 @@
                     "bookings",
                     "create"
                   ]
-                }
+                },
+                "description": "This API creates a new booking in the system."
               },
               "response": []
             },
             {
-              "name": "/create",
+              "name": "/cancel",
               "request": {
                 "auth": {
                   "type": "noauth"
                 },
-                "method": "POST",
+                "method": "PUT",
                 "header": [
                   {
                     "key": "Content-Type",
                     "value": "application/json"
                   }
                 ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"customerId\": 8,\n  \"hotelId\": 1,\n  \"checkIn\": \"2026-02-15\",\n  \"checkOut\": \"2026-02-18\",\n  \"numberOfRooms\": 2\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                },
                 "url": {
-                  "raw": "http://localhost:8085/api/bookings/create",
+                  "raw": "http://localhost:8085/api/bookings/cancel/11",
                   "protocol": "http",
                   "host": [
                     "localhost"
@@ -82,7 +165,64 @@
                   "path": [
                     "api",
                     "bookings",
-                    "create"
+                    "cancel",
+                    "11"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/delete",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8085/api/bookings/delete/10",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8085",
+                  "path": [
+                    "api",
+                    "bookings",
+                    "delete",
+                    "10"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/expire",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuaWtraSIsInJvbGVzIjpbIkFETUlOIl0sImlhdCI6MTc3MTkyODE5MSwiZXhwIjoxNzcxOTMxNzkxfQ.ObRJpbDgKgfPnjntTxQvwbqD3y1uS8Z_cxJnhhiXJR8",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "http://localhost:8085/api/bookings/expire",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8085",
+                  "path": [
+                    "api",
+                    "bookings",
+                    "expire"
                   ]
                 }
               },
@@ -132,7 +272,8 @@
                     "hotels",
                     "create"
                   ]
-                }
+                },
+                "description": "This API is used to create a new hotel in the Skyline system."
               },
               "response": []
             },
@@ -174,7 +315,56 @@
                     "get",
                     "1"
                   ]
-                }
+                },
+                "description": "This API retrieves the details of a specific hotel using its ID."
+              },
+              "response": []
+            },
+            {
+              "name": "/list",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8085/api/hotels/list?page=0&size=5&sortBy=name&sortDir=asc",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8085",
+                  "path": [
+                    "api",
+                    "hotels",
+                    "list"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "5"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "name"
+                    },
+                    {
+                      "key": "sortDir",
+                      "value": "asc"
+                    }
+                  ]
+                },
+                "description": "This API fetches the list of all hotels available in the system."
               },
               "response": []
             },
@@ -208,58 +398,12 @@
                       "value": "Bangalore"
                     }
                   ]
-                }
+                },
+                "description": "This API searches hotels based on location or name."
               },
               "response": []
             }
           ]
-        },
-        {
-          "name": "/list",
-          "request": {
-            "auth": {
-              "type": "noauth"
-            },
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:8085/api/hotels/list?page=0&size=5&sortBy=name&sortDir=asc",
-              "protocol": "http",
-              "host": [
-                "localhost"
-              ],
-              "port": "8085",
-              "path": [
-                "api",
-                "hotels",
-                "list"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "5"
-                },
-                {
-                  "key": "sortBy",
-                  "value": "name"
-                },
-                {
-                  "key": "sortDir",
-                  "value": "asc"
-                }
-              ]
-            }
-          },
-          "response": []
         }
       ]
     },
@@ -267,10 +411,10 @@
       "name": "User",
       "item": [
         {
-          "name": "UserController",
+          "name": "Users-sign-up",
           "item": [
             {
-              "name": "/create",
+              "name": "/sing-up",
               "request": {
                 "auth": {
                   "type": "noauth"
@@ -284,7 +428,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Apple\",\n  \"email\": \"apple567@gmail.com\",\n  \"phone\": \"9876543213\"\n}",
+                  "raw": "{\n  \"username\": \"pavan\",\n  \"email\": \"pava@gmail.com\",\n  \"phone\": \"9999999999\",\n  \"password\": \"pavan123\",\n  \"role\": \"ADMIN\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -302,6 +446,140 @@
                     "api",
                     "users",
                     "sign-up"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "UsersController",
+          "item": [
+            {
+              "name": "/list",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer YOUR_TOKEN",
+                    "disabled": true
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8085/api/users/list?page=0&size=9&sortBy=id&sortDir=asc&",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8085",
+                  "path": [
+                    "api",
+                    "users",
+                    "list"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "9"
+                    },
+                    {
+                      "key": "sortBy",
+                      "value": "id"
+                    },
+                    {
+                      "key": "sortDir",
+                      "value": "asc"
+                    },
+                    {
+                      "key": "",
+                      "value": null,
+                      "description": "This API returns all users from the system."
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "/get",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer YOUR_TOKEN",
+                    "disabled": true
+                  }
+                ],
+                "url": {
+                  "raw": "http://localhost:8085/api/users/get/19",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8085",
+                  "path": [
+                    "api",
+                    "users",
+                    "get",
+                    "19"
+                  ]
+                },
+                "description": "This API fetches user details using user ID."
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "authController",
+          "item": [
+            {
+              "name": "/login",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"arnav\",\n  \"password\": \"arnav123\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:8085/auth/login",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "8085",
+                  "path": [
+                    "auth",
+                    "login"
                   ]
                 }
               },

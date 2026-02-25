@@ -1,6 +1,7 @@
 package com.skyline.service.impl;
 
 import com.skyline.dto.UsersResponse;
+import com.skyline.exception.BookingCancelException;
 import com.skyline.exception.RequestRoomException;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -9,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.skyline.dto.BookingRequest;
 import com.skyline.dto.BookingResponse;
@@ -22,7 +25,9 @@ import com.skyline.repository.UsersRepository;
 import com.skyline.repository.HotelRepository;
 import com.skyline.service.BookingService;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -114,7 +119,32 @@ public class BookingServiceImpl implements BookingService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Booking> bookingPage = bookingRepository.findAll(pageable);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User not authenticated");
+        }
+
+
+        String username = authentication.getName();
+        log.info("Logged in Username: {}", username);
+
+        List<String> roles = authentication.getAuthorities()
+                .stream()
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .toList();
+
+        log.info("User Roles: {}", roles);
+
+        Page<Booking> bookingPage;
+
+        boolean isAdmin = roles.stream().anyMatch(name -> name.equals("ADMIN"));
+
+        log.info("Is Admin: {}", isAdmin);
+        if (isAdmin) {
+            bookingPage = bookingRepository.findAll(pageable);
+        } else {
+            bookingPage = bookingRepository.findByUsers_Username(username, pageable);
+        }
 
         return bookingPage.getContent()
                 .stream()
@@ -128,9 +158,8 @@ public class BookingServiceImpl implements BookingService {
                     response.setNumberOfRooms(booking.getNumberOfRooms());
                     response.setStatus(booking.getStatus().name());
 
-                    Users user = booking.getUsers();
-                    if (user != null) {
-                        response.setCustomerName(user.getUsername());
+                    if (booking.getUsers() != null) {
+                        response.setCustomerName(booking.getUsers().getUsername());
                     }
                     if (booking.getHotel() != null) {
                         response.setHotelName(booking.getHotel().getName());
@@ -142,12 +171,21 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponse deleteBookingById(int bookingId) {
+    public String deleteBookingById(int bookingId) {
+        log.info("Start:: deleteBooking() inside BookingServiceImpl");
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
+        if (booking.isDeleted()) {
+            throw new NotFoundException("Booking already deleted with id: " + bookingId);
+        }
+        booking.setDeleted(true);
         booking.setStatus(BookingStatus.CANCELLED);
         Booking updated = bookingRepository.save(booking);
-        return modelMapper.map(updated, BookingResponse.class);
+
+        modelMapper.map(updated, BookingResponse.class);
+        log.info("Start:: deleteBooking() inside BookingServiceImpl");
+
+        return "Booking deleted successfully with id: " + bookingId;
     }
 
     @Override
@@ -197,5 +235,33 @@ public class BookingServiceImpl implements BookingService {
         response.setStatus(booking.getStatus().name());
 
         return response;
+    }
+
+    @Override
+    public String cancelBooking(int bookingId) {
+        log.info("Start:: cancelBooking() inside BookingServiceImpl");
+
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException("Booking not found with id: " + bookingId));
+
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new BookingCancelException("Booking is already cancelled");
+        }
+        booking.setStatus(BookingStatus.CANCELLED);
+        booking = bookingRepository.save(booking);
+
+        modelMapper.map(booking, BookingResponse.class);
+        log.info("End:: cancelBooking() inside BookingServiceImpl");
+
+        return "Booking canceled successfully with id: " + bookingId;
+    }
+
+    @Override
+    public String expireBookings() {
+        log.info("Start :: expireBookings() method execution");
+        List<Booking> bookings = bookingRepository.findBycheckOutBefore(LocalDate.now());
+        bookings.forEach(booking -> booking.setStatus(BookingStatus.EXPIRED));
+        bookingRepository.saveAll(bookings);
+        log.info("End :: expireBookings() method execution");
+        return bookings.size() + " of bookings expired successfully";
     }
 }

@@ -2,6 +2,8 @@ package com.skyline.repository;
 
 import com.skyline.entity.Users;
 import com.skyline.enums.BookingStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import com.skyline.entity.Booking;
@@ -18,5 +20,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             BookingStatus status
     );
 
-//    Optional<Booking> findByIdWithUser(int bookingId);
+    Page<Booking> findByUsers_Username(String username, Pageable pageable);
+
+    List<Booking> findBycheckOutBefore(LocalDate now);
 }

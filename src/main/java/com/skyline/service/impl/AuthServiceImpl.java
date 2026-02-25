@@ -37,7 +37,6 @@ public class AuthServiceImpl implements AuthService {
         return LoginResponse.builder()
                 .message("Login successful")
                 .username(users.getUsername())
-                .userId(users.getId())
                 .token(token)
                 .build();
     }

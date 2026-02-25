@@ -2,6 +2,8 @@ package com.skyline.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class UsersResponse {
     private int id;

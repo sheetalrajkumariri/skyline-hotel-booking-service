@@ -46,13 +46,39 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(BookingCancelException.class)
+    public ResponseEntity<Map<String, Object>> BookingCancelException(BookingCancelException e) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDate.now());
+        errorResponse.put("message", e.getMessage());
+        errorResponse.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<String> handleInvalidToken(InvalidTokenException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+    public ResponseEntity<String> handleInvalidToken(InvalidTokenException e) {
+
+        Map<String, Object> errorResponse = new HashMap<>();
+
+        errorResponse.put("timestamp", LocalDate.now());
+        errorResponse.put("message", e.getMessage());
+        errorResponse.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
     }
 
     @ExceptionHandler(UnauthorizedTokenException.class)
-    public ResponseEntity<String> handleUnauthorizedToken(UnauthorizedTokenException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    public ResponseEntity<String> handleUnauthorizedToken(UnauthorizedTokenException e) {
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("timestamp", LocalDate.now());
+        errorResponse.put("message", e.getMessage());
+        errorResponse.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+        errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
 }
