@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -77,6 +78,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setStatus(BookingStatus.BOOKED);
 
         booking = bookingRepository.save(booking);
+
 
         BookingResponse response = modelMapper.map(booking, BookingResponse.class);
         response.setBookingId(booking.getId());
@@ -255,13 +257,14 @@ public class BookingServiceImpl implements BookingService {
         return "Booking canceled successfully with id: " + bookingId;
     }
 
+    @Async
     @Override
-    public String expireBookings() {
+    public void expireBookings() {
         log.info("Start :: expireBookings() method execution");
         List<Booking> bookings = bookingRepository.findBycheckOutBefore(LocalDate.now());
         bookings.forEach(booking -> booking.setStatus(BookingStatus.EXPIRED));
         bookingRepository.saveAll(bookings);
         log.info("End :: expireBookings() method execution");
-        return bookings.size() + " of bookings expired successfully";
+        log.info(bookings.size() + " of bookings expired successfully");
     }
 }

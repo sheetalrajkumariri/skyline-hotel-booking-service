@@ -59,7 +59,8 @@ public class BookingController {
     @PutMapping("/expire")
     public String expireBookings() {
         log.info("Start::expireBookings()inside the bookingController");
-        return bookingService.expireBookings();
+        bookingService.expireBookings();
+        return "Expired successfully";
     }
 
 

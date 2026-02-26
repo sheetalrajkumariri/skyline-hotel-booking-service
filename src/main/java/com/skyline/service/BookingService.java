@@ -19,5 +19,5 @@ public interface BookingService {
 
     String cancelBooking(int bookingId);
 
-    String expireBookings();
+    void expireBookings();
 }
