@@ -1,9 +1,9 @@
 package com.skyline.service.impl;
 
-import com.skyline.dto.HotelResponse;
 import com.skyline.entity.Role;
 import com.skyline.exception.EmailAlreadyExistsException;
 import com.skyline.repository.RoleRepository;
+import com.skyline.service.emailService.EmailService;
 import com.skyline.util.EmailValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -35,6 +35,8 @@ public class UsersServiceImpl implements UsersService {
     private RoleRepository roleRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public UsersResponse createUser(UsersRequest request) {
@@ -53,6 +55,13 @@ public class UsersServiceImpl implements UsersService {
         Role role = roleRepository.findRoleByName(request.getRole()).orElseThrow(() -> new NotFoundException("Role not found with name: " + "User"));
         user.setRoles(Set.of(role));
         user = usersRepository.save(user);
+
+        try {
+            emailService.sendUserCreationEmail(user.getEmail(), user.getUsername());
+            log.info("Welcome email sent to: {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send welcome email to {}:", user.getEmail(), e);
+        }
         UsersResponse usersResponse = modelMapper.map(user, UsersResponse.class);
         usersResponse.setRole(user.getRoles().stream().findFirst().get().getName());
         log.info("End:: createUser()inside the UserServiceImpl with request, {} ", request);

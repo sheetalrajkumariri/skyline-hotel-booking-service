@@ -51,7 +51,7 @@ public class SecurityConfig {
 //                        .requestMatchers("/auth/**", "/api/users/sign-up", "/api/hotels/**").permitAll()
 //                        .requestMatchers("/api/hotels/create", "/api/users/list").hasAuthority("ADMIN")
 //                        .requestMatchers("/users/**", "/api/bookings/**").hasAnyRole("USER", "ADMIN")
-                        .requestMatchers("/**").permitAll()
+                          .requestMatchers("/**").permitAll()
 
                         .anyRequest().authenticated()
 

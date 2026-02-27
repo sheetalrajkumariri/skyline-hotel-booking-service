@@ -23,9 +23,11 @@ public class Booking {
     private int id;
     private LocalDate checkInDate;
     private LocalDate checkOut;
+    private String customerEmail;
     @Enumerated(EnumType.STRING)
     private BookingStatus status;
     private int numberOfRooms;
+
 
     @ManyToOne //Booking <-> Hotel
     @JoinColumn(name = "hotel_id")

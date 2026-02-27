@@ -11,4 +11,5 @@ public class BookingRequest {
     private LocalDate checkIn;
     private LocalDate checkOut;
     private int numberOfRooms;
+    private String customerEmail;
 }

@@ -1,8 +1,8 @@
 package com.skyline.service.impl;
 
-import com.skyline.dto.UsersResponse;
 import com.skyline.exception.BookingCancelException;
 import com.skyline.exception.RequestRoomException;
+import com.skyline.service.emailService.EmailService;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,6 @@ import com.skyline.service.BookingService;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -42,6 +41,8 @@ public class BookingServiceImpl implements BookingService {
     private UsersRepository usersRepository;
     @Autowired
     private HotelRepository hotelRepository;
+    @Autowired
+    private EmailService emailService;
 
 
     @Override
@@ -76,8 +77,16 @@ public class BookingServiceImpl implements BookingService {
         booking.setUsers(users);
         booking.setHotel(hotel);
         booking.setStatus(BookingStatus.BOOKED);
+        booking.setCustomerEmail(users.getEmail());
 
         booking = bookingRepository.save(booking);
+
+        try {
+            emailService.sendBookingConfirmation(booking.getCustomerEmail(), booking);
+            log.info("Booking confirmation email sent successfully to {}", booking.getCustomerEmail());
+        } catch (Exception e) {
+            log.error("Failed to send booking confirmation email to {}: {}", booking.getCustomerEmail(), e.getStackTrace(), e);
+        }
 
 
         BookingResponse response = modelMapper.map(booking, BookingResponse.class);
