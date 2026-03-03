@@ -16,7 +16,7 @@ public class CronJobService {
     @Autowired
     private  BookingService bookingService;
 
-    @Scheduled(cron = "0 0/1 * * * ?")
+    @Scheduled(cron = "0 0/15 * * * ?")
     public void jobToBookingExpired() {
 
         log.info("Start:: jobToBookingExpired at "+ LocalDate.now() +" & Thread Name :: "+Thread.currentThread().getName());
